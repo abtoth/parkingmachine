@@ -3,6 +3,7 @@ package com.epam.academy.parkingmachine.coin;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.epam.academy.parkingmachine.CannotRefundException;
 import com.epam.academy.parkingmachine.Cassa;
 
 public class CoinHolder {
@@ -34,7 +35,7 @@ public class CoinHolder {
 		return coins.get(coin);
 	}
 
-	public void removeCoin(int coin, int amount) throws Exception {
+	public void removeCoin(int coin, int amount) throws RemoveCoinFromEmptyCoinHolder {
 		if (amount == 0) {
 			return;
 		}
@@ -42,7 +43,7 @@ public class CoinHolder {
 		Integer quantity = coins.get(coin);
 
 		if (quantity == null || quantity < amount) {
-			throw new Exception("Not enough coin to remove!");
+			throw new RemoveCoinFromEmptyCoinHolder("Not enough coin to remove!");
 		} else {
 			quantity -= amount;
 		}
@@ -82,15 +83,19 @@ public class CoinHolder {
 		return myHolder;
 	}
 	
-	public CoinHolder collectCoinsEqual(int amount) throws Exception {
+	public CoinHolder collectCoinsEqual(int amount) throws CannotRefundException {
 		CoinHolder result = new CoinHolder();
 		
-		for(int i = Cassa.availableCoins.length; i > 0; i--) {
+		for(int i = Cassa.availableCoins.length-1; i > 0; i--) {
 			int coinType = Cassa.availableCoins[i];
 			int amountOfType = this.getCoint(coinType);
 			
 			while (coinType <= amount && amountOfType > 0) {
-				removeCoin(coinType, 1);
+				try {
+					removeCoin(coinType, 1);
+				} catch (RemoveCoinFromEmptyCoinHolder e) {
+					break;
+				}
 				
 				result.addCoin(coinType);
 				
@@ -100,6 +105,7 @@ public class CoinHolder {
 		
 		if(amount > 0) {
 			addCoinHolder(result);
+			throw new CannotRefundException("Can not refund");			
 		}
 		
 		return result;

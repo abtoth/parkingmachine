@@ -3,7 +3,6 @@ package com.epam.academy.parkingmachine;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 import com.epam.academy.parkingmachine.coin.CoinHolder;
 import com.epam.academy.parkingmachine.ticket.Ticket;
@@ -93,40 +92,41 @@ public class Cashier implements Runnable {
 
 	}
 
-	public CashierProcessStatus handleInsertedCoin(Ticket ticket, CoinHolder insertedCoins, int insertedCoinValue)
-			throws Exception {
+	public CashierProcessStatus handleInsertedCoin(Ticket ticket, CoinHolder insertedCoins, int insertedCoinValue) throws Exception {
 		insertedCoins.addCoin(insertedCoinValue);
 		if (insertedCoins.getSumValue() >= ticket.getFee()) {
 			int refundAmount = ticket.getFee() - insertedCoinValue;
 
-			CoinHolder refund = calculateRefund(insertedCoins, refundAmount);
-
-			if (refund != null) {
-
-				if (!refund.isEmpty()) {
-					cassa.removeCoins(refund);
-					System.out.println("Refund: ");
-					refund.printCoins();
-				} else {
-					System.out.println("No refund...");
-				}
-				System.out.println("Thank you! Bye!");
-				ticket.setStatus(ticketStatus.PAID);
-				return CashierProcessStatus.ENOUGH_COINS;
-			} else {
+			CoinHolder refund;
+			try {
+				refund = calculateRefund(insertedCoins, refundAmount);
+			} catch (CannotRefundException e) {
 				System.out.println("I don't have enough coins to refund the change. ");
 				return CashierProcessStatus.CAN_NOT_REFUND;
 			}
+
+			if (refund.isEmpty()) {
+				System.out.println("No refund...");
+			} else {
+				cassa.removeCoins(refund);
+				System.out.println("Refund: ");
+				refund.printCoins();
+			}
+			System.out.println("Thank you! Bye!");
+			ticket.setStatus(ticketStatus.PAID);
+			return CashierProcessStatus.ENOUGH_COINS;
 		}
 
 		return CashierProcessStatus.NOT_ENOUGH_COINS;
 	}
 
-	public CoinHolder calculateRefund(CoinHolder insertedCoins, int refundAmount) {
-		// TODO implementation
-		CoinHolder totalCoins = insertedCoins.addWith(cassa.getCassa());
+	public CoinHolder calculateRefund(CoinHolder insertedCoins, int refundAmount) throws CannotRefundException {
 
-		return null;
+		CoinHolder totalCoins = insertedCoins.addWith(cassa.getCassa());
+		
+		CoinHolder refund = totalCoins.collectCoinsEqual(refundAmount);
+		
+		return refund;
 	}
 
 }
