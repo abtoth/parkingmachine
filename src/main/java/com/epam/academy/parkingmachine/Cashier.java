@@ -13,11 +13,9 @@ import com.epam.academy.parkingmachine.ticket.Ticket.ticketStatus;
 public class Cashier implements Runnable {
 
 	private enum CashierProcessStatus {
-		NOT_ENOUGH_COINS,
-		ENOUGH_COINS,
-		CAN_NOT_REFUND		
+		NOT_ENOUGH_COINS, ENOUGH_COINS, CAN_NOT_REFUND
 	}
-	
+
 	private Cassa cassa = new Cassa();
 	private TicketService ticketService = new TicketService();
 
@@ -36,7 +34,7 @@ public class Cashier implements Runnable {
 				System.out.println("Not a valid ticket id!");
 			} else {
 				ticketService.calculateParkingFee(ticket);
-				
+
 				try {
 					readInCoins(ticket);
 				} catch (Exception e) {
@@ -66,7 +64,7 @@ public class Cashier implements Runnable {
 		ticket.setStatus(Ticket.ticketStatus.UNDER_PAYMENT);
 
 		CoinHolder insertedCoins = new CoinHolder();
-		
+
 		BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 		String line;
 		try {
@@ -95,12 +93,12 @@ public class Cashier implements Runnable {
 
 	}
 
-	public CashierProcessStatus handleInsertedCoin(Ticket ticket, CoinHolder insertedCoins, int insertedCoinValue) throws Exception {
-
+	public CashierProcessStatus handleInsertedCoin(Ticket ticket, CoinHolder insertedCoins, int insertedCoinValue)
+			throws Exception {
 		insertedCoins.addCoin(insertedCoinValue);
 		if (insertedCoins.getSumValue() >= ticket.getFee()) {
 			int refundAmount = ticket.getFee() - insertedCoinValue;
-			
+
 			CoinHolder refund = calculateRefund(insertedCoins, refundAmount);
 
 			if (refund != null) {
@@ -120,38 +118,15 @@ public class Cashier implements Runnable {
 				return CashierProcessStatus.CAN_NOT_REFUND;
 			}
 		}
-		
+
 		return CashierProcessStatus.NOT_ENOUGH_COINS;
 	}
 
 	public CoinHolder calculateRefund(CoinHolder insertedCoins, int refundAmount) {
+		// TODO implementation
 		CoinHolder totalCoins = insertedCoins.addWith(cassa.getCassa());
-		
-		
-		/*
-		 * Map<Integer, Integer> returnCoins = new HashMap<>();
-		 * 
-		 * int insertedSum = getCoinsValue(insertedCoins); int returnValue =
-		 * insertedSum - fee;
-		 * 
-		 * for(Integer i:cassa.getCassa().keySet()) {
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * }
-		 */
 
 		return null;
-	}
-
-	private int getCoinsValue(Map<Integer, Integer> coins) {
-		int sum = 0;
-		for (Integer i : coins.keySet()) {
-			sum += coins.get(i) * i;
-		}
-		return sum;
 	}
 
 }

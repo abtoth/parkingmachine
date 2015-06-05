@@ -6,12 +6,11 @@ import com.epam.academy.parkingmachine.coin.CoinHolder;
 
 public class Cassa {
 
-	public static final Integer[] availableCoins = { 5, 10, 20, 50, 100, 200, 500, 1000,
-			2000, 5000, 10000, 20000 };
+	public static final Integer[] availableCoins = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000 };
 
 	private CoinHolder cassa = new CoinHolder();
 
-	{
+	public Cassa() {
 		cassa.addCoin(5, 100);
 		cassa.addCoin(10, 50);
 		cassa.addCoin(20, 0);
